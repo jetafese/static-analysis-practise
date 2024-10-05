@@ -36,19 +36,16 @@ class IdChecker (ast.AstVisitor):
         pass
 
     def visit_AsgnStmt(self, node, *args, **kwargs):
-        self.visit_Stmt(node, *args, **kwargs)
         self.visit(node.lhs, *args, **kwargs)
         self.visit(node.rhs, *args, **kwargs)
 
     def visit_IfStmt(self, node, *args, **kwargs):
-        self.visit_Stmt(node, *args, **kwargs)
         self.visit(node.cond, *args, **kwargs)
         self.visit(node.then_stmt, *args, **kwargs)
         if node.has_else():
             self.visit(node.else_stmt, *args, **kwargs)
 
     def visit_WhileStmt(self, node, *args, **kwargs):
-        self.visit_Stmt(node, *args, **kwargs)
         self.visit(node.cond, *args, **kwargs)
         self.visit(node.body, *args, **kwargs)
 
@@ -57,11 +54,9 @@ class IdChecker (ast.AstVisitor):
         self.visit(node.cond, *args, **kwargs)
 
     def visit_AssumeStmt(self, node, *args, **kwargs):
-        self.visit_Stmt(node, *args, **kwargs)
         self.visit(node.cond, *args, **kwargs)
 
     def visit_HavocStmt(self, node, *args, **kwargs):
-        self.visit_Stmt(node, *args, **kwargs)
         for v in node.vars:
             self.visit(v, *args, **kwargs)
 

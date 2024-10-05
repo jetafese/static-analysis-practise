@@ -2,7 +2,7 @@ havoc x, y;
 assume y >= 0;
 c := 0;
 r := x;
-while c < y 
+while c < y
 inv c <= y and r = x + c
 do
 {
