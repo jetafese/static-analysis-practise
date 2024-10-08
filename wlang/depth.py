@@ -47,6 +47,7 @@ class DepthChecker (ast.AstVisitor):
     def visit_WhileStmt(self, node, *args, **kwargs):
         self.visit(node.cond, *args, **kwargs)
         self.visit(node.body, *args, **kwargs)
+        self.depth = self.depth + 5
 
     def visit_AssertStmt(self, node, *args, **kwargs):
         self.visit(node.cond, *args, **kwargs)
