@@ -77,19 +77,19 @@ class Domain (object):
         self._bottoms = other.get_bottoms()
 
     def checkEquals(self, other):
-        print(len(self._evens.difference(other._evens)), len(other._evens.difference(self._evens)))
+        # print(len(self._evens.difference(other._evens)), len(other._evens.difference(self._evens)))
         if len(self._evens.difference(other._evens)) > 0 or len(other._evens.difference(self._evens)) > 0:
             return False
-        print(len(self._odds.difference(other._odds)), len(other._odds.difference(self._odds)))
+        # print(len(self._odds.difference(other._odds)), len(other._odds.difference(self._odds)))
         if len(self._odds.difference(other._odds)) > 0 or len(other._odds.difference(self._odds)) > 0:
             return False
-        print(len(self._zeros.difference(other._zeros)), len(other._zeros.difference(self._zeros)))
+        # print(len(self._zeros.difference(other._zeros)), len(other._zeros.difference(self._zeros)))
         if len(self._zeros.difference(other._zeros)) > 0 or len(other._zeros.difference(self._zeros)) > 0:
             return False
-        print(len(other._tops.difference(other._tops)), len(other._tops.difference(self._tops)))
+        # print(len(other._tops.difference(other._tops)), len(other._tops.difference(self._tops)))
         if len(self._tops.difference(other._tops)) > 0 or len(other._tops.difference(self._tops)) > 0:
             return False
-        print(len(self._bottoms.difference(other._bottoms)), len(other._bottoms.difference(self._bottoms)))
+        # print(len(self._bottoms.difference(other._bottoms)), len(other._bottoms.difference(self._bottoms)))
         if len(self._bottoms.difference(other._bottoms)) > 0 or len(other._bottoms.difference(self._bottoms)) > 0:
             return False
         return True
@@ -117,6 +117,14 @@ class Domain (object):
         self._zeros = self._zeros.union(fact._zeros)
         self._tops = self._tops.union(fact._tops)
         self._bottoms = self._bottoms.union(fact._bottoms)
+        # collect remainders
+        # print("JOIN")
+        # # print("es: ", len(tempEvens), ", os: ", len(tempOdds), ", zs: ", len(tempZeros))
+        # print("es: ", len(self._evens), ", os: ", len(self._odds), ", zs: ", len(self._zeros), ", ts: ", len(self._tops), ", bs: ", len(self._bottoms))
+        # print("es: ", len(fact._evens), ", os: ", len(fact._odds), ", zs: ", len(fact._zeros), ", ts: ", len(fact._tops), ", bs: ", len(fact._bottoms))
+        # comb = self._evens.union(self._odds.union(self._zeros.union(self._tops.union(self._bottoms))))
+        # for val in comb:
+        #     # print(val)
         # merge verdicts
         tempBottom = self._bottoms
         for val in tempBottom:
@@ -130,7 +138,6 @@ class Domain (object):
         for val in tempEvens:
             if val in tempEvensFork.get_odds() or val in tempEvensFork.get_zeros():
                 tempEvensFork.mark_top(val)
-                print(val)
         self.set_domain(tempEvensFork)
         # handle odds
         tempOdds = self._odds
@@ -138,7 +145,6 @@ class Domain (object):
         for val in tempOdds:
             if val in tempOddsFork.get_odds() or val in tempOddsFork.get_zeros():
                 tempOddsFork.mark_top(val)
-                print(val)
         self.set_domain(tempOddsFork)
         # handle zeros
         tempZeros = self._zeros
@@ -146,7 +152,6 @@ class Domain (object):
         for val in tempZeros:
             if val in tempZerosFork.get_odds() or val in tempZerosFork.get_zeros():
                 tempZerosFork.mark_top(val)
-                print(val)
         self.set_domain(tempZerosFork)
         
     def fork(self):
@@ -311,7 +316,7 @@ class CFGAnalysis (ast.AstVisitor):
 
 
     def visit_StmtList(self, node, *args, **kwargs):
-        print("statements:")
+        # print("statements:")
         for n in node.stmts:
             df = self.visit(n)
         return df
@@ -325,10 +330,10 @@ class CFGAnalysis (ast.AstVisitor):
         return dom
 
     def visit_AsgnStmt(self, node, *args, **kwargs):
-        print("assng: ", node.lhs, " ", node.rhs)
+        # print("assng: ", node.lhs, " ", node.rhs)
         dom = kwargs['dom']
         res = self.visit(node.rhs, dom=dom)
-        print(res)
+        # print(res)
         if res == Types.EVEN:
             dom.mark_even(node.lhs)
         elif res == Types.ODD:
@@ -339,11 +344,11 @@ class CFGAnalysis (ast.AstVisitor):
             dom.mark_top(node.lhs)
         else:
             dom.mark_bottom(node.lhs)
-        print(dom.get_type(node.lhs))
+        # print(dom.get_type(node.lhs))
         return dom
 
     def visit_AExp(self, node, *args, **kwargs):
-        print("aexp: ")
+        # print("aexp: ")
         kids = [self.visit(a, *args, **kwargs) for a in node.args]
         dom = kwargs['dom']
 
@@ -361,12 +366,12 @@ class CFGAnalysis (ast.AstVisitor):
         return reduce(fn, kids)
 
     def visit_IntVar(self, node, *args, **kwargs):
-        print("int var: ", node.name)
+        # print("int var: ", node.name)
         dom = kwargs['dom']
         return dom.get_type(node)
 
     def visit_Const(self, node, *args, **kwargs):
-        print("const: ", node.val)
+        # print("const: ", node.val)
         if node.val == 0:
             return Types.ZERO
         if node.val % 2 == 0:
@@ -380,35 +385,60 @@ class CFGAnalysis (ast.AstVisitor):
         return dom
 
     def visit_Stmt(self, node, *args, **kwargs):
-        print("stmt")
+        # print("stmt")
         return kwargs['dom']
     
     def visit_IfStmt(self, node, *args, **kwargs):
-        print("ifstmt")
+        # print("ifstmt")
         dom = kwargs['dom']
-        # self.visit(node.cond)
         dom_then = dom.fork()
         dom_then = self.visit(node.then_stmt, dom=dom_then)
         dom.join(dom_then)
-        print("done then")
+        # print("done then")
         dom_else = dom.fork()
         if node.has_else():
             dom_else = self.visit(node.else_stmt, dom=dom_else)
-            print("done else")
+            # print("done else")
         dom.join(dom_else)
         return dom
 
     def visit_AssertStmt(self, node, *args, **kwargs):
-        print("assert")
-        return kwargs['dom']
+        # print("assert")
+        return self.visit(node.cond, *args, **kwargs)
 
     def visit_AssumeStmt(self, node, *args, **kwargs):
-        print("assume")
-        return kwargs['dom']
+        # print("assume")
+        return self.visit(node.cond, *args, **kwargs)
 
     def visit_WhileStmt(self, node, *args, **kwargs):
-        print("whilestmt")
-        return kwargs['dom']
+        # print("whilestmt")
+        dom = kwargs['dom']
+        dom_else = dom.fork()
+        dom = self.visit(node.body, dom=dom)
+        dom.join(dom_else)
+        return dom
+
+    def visit_RelExp(self, node, *args, **kwargs):
+        # print("relexp")
+        dom = kwargs['dom']
+        lhs = node.arg(0)
+        rhs = self.visit(node.arg(1), *args, **kwargs)
+        trhs = rhs
+        if isinstance(lhs, ast.IntVar):
+            if not isinstance(rhs, Types):
+                trhs = dom.get_type(rhs)
+            if node.op == "=":
+                if trhs == Types.EVEN:
+                    dom.mark_even(lhs)
+                elif trhs == Types.ODD:
+                    dom.mark_odd(lhs)
+                elif trhs == Types.ZERO:
+                    dom.mark_zero(lhs)
+                elif trhs == Types.TOP:
+                    dom.mark_top(lhs)
+                else:
+                    dom.mark_bottom(lhs)
+        return dom
 
 def main():
     import sys

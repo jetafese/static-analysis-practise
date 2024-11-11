@@ -4,6 +4,15 @@ from . import ast, cfg
 
 
 class TestCFG(unittest.TestCase):
+    def test_prog_1(self):
+        cfgCheck = cfg.CFGAnalysis()
+        cfgCheck.analyze('wlang/prog1.prg')
+        self.assertEqual(len(cfgCheck.get_zeros()), 0)
+        self.assertEqual(len(cfgCheck.get_odds()), 0)
+        self.assertEqual(len(cfgCheck.get_bottoms()), 0)
+        self.assertEqual(len(cfgCheck.get_evens()), 0)
+        self.assertEqual(set([ast.IntVar('y'), ast.IntVar('c'), ast.IntVar('r'), ast.IntVar('x')]), cfgCheck.get_tops())
+
     def test_prog_2(self):
         cfgCheck = cfg.CFGAnalysis()
         cfgCheck.analyze('wlang/prog2.prg')
@@ -16,6 +25,24 @@ class TestCFG(unittest.TestCase):
     def test_prog_3(self):
         cfgCheck = cfg.CFGAnalysis()
         cfgCheck.analyze('wlang/prog3.prg')
+        self.assertEqual(len(cfgCheck.get_zeros()), 0)
+        self.assertEqual(len(cfgCheck.get_odds()), 0)
+        self.assertEqual(len(cfgCheck.get_evens()), 0)
+        self.assertEqual(len(cfgCheck.get_bottoms()), 0)
+        self.assertEqual(set([ast.IntVar('x')]), cfgCheck.get_tops())
+
+    def test_prog_4(self):
+        cfgCheck = cfg.CFGAnalysis()
+        cfgCheck.analyze('wlang/prog4.prg')
+        self.assertEqual(len(cfgCheck.get_zeros()), 0)
+        self.assertEqual(len(cfgCheck.get_odds()), 0)
+        self.assertEqual(len(cfgCheck.get_evens()), 0)
+        self.assertEqual(len(cfgCheck.get_bottoms()), 0)
+        self.assertEqual(set([ast.IntVar('x')]), cfgCheck.get_tops())
+
+    def test_prog_5(self):
+        cfgCheck = cfg.CFGAnalysis()
+        cfgCheck.analyze('wlang/prog5.prg')
         self.assertEqual(len(cfgCheck.get_zeros()), 0)
         self.assertEqual(len(cfgCheck.get_odds()), 0)
         self.assertEqual(len(cfgCheck.get_evens()), 0)
