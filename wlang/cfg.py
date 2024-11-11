@@ -153,7 +153,30 @@ class CFGAnalysis (ast.AstVisitor):
         return self._dom.get_tops()
     
     def get_add(self, lhs, rhs, dom):
-        return 
+        tlhs = lhs
+        trhs = rhs
+        if not isinstance(lhs, Types):
+            tlhs = dom.get_type(lhs)
+        if not isinstance(rhs, Types):
+            trhs = dom.get_type(rhs)
+        if tlhs == Types.BOTTOM or trhs == Types.BOTTOM:
+            return Types.BOTTOM
+        if tlhs == Types.TOP or trhs == Types.TOP:
+            return Types.TOP
+        if tlhs == Types.ZERO:
+            return trhs
+        if trhs == Types.ZERO:
+            return tlhs
+        if tlhs == Types.EVEN:
+            if trhs == Types.ODD:
+                return Types.ODD
+            return Types.EVEN
+        if tlhs == Types.ODD:
+            if trhs == Types.ODD:
+                return Types.EVEN
+            return Types.ODD
+
+        return Types.TOP
 
     def get_mult(self, lhs, rhs, dom):
         tlhs = lhs
@@ -174,7 +197,26 @@ class CFGAnalysis (ast.AstVisitor):
         return Types.TOP
 
     def get_sub(self, lhs, rhs, dom):
-        return 
+        tlhs = lhs
+        trhs = rhs
+        if not isinstance(lhs, Types):
+            tlhs = dom.get_type(lhs)
+        if not isinstance(rhs, Types):
+            trhs = dom.get_type(rhs)
+        if tlhs == Types.BOTTOM or trhs == Types.BOTTOM:
+            return Types.BOTTOM
+        if tlhs == Types.TOP or trhs == Types.TOP:
+            return Types.TOP
+        if tlhs == Types.ZERO:
+            return trhs
+        if trhs == Types.ZERO:
+            return tlhs
+        if tlhs == Types.EVEN and trhs == Types.ODD:
+            return Types.ODD
+        if tlhs == Types.ODD and trhs == Types.EVEN:
+            return Types.ODD
+
+        return Types.TOP
 
     def get_div(self, lhs, rhs, dom):
         tlhs = lhs
