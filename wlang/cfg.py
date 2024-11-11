@@ -23,7 +23,7 @@ class Domain (object):
            _|_
     """
 
-    def __init__(self, evens=None, odds=None, zeros=None, all=None):
+    def __init__(self, evens=None, odds=None, zeros=None, tops=None, bottoms=None):
         # even variables
         if evens is None or len(evens) == 0:
             self._evens = set()
@@ -42,11 +42,17 @@ class Domain (object):
         else:
             self._zeros = set(zeros)
 
-        # all variables
-        if all is None or len(all) == 0:
+        # top variables
+        if tops is None or len(tops) == 0:
             self._tops = set()
         else:
-            self._tops = set(all)
+            self._tops = set(tops)
+
+        # bottom variables
+        if bottoms is None or len(bottoms) == 0:
+            self._bottoms = set()
+        else:
+            self._bottoms = set(bottoms)
 
     def get_evens(self):
         return self._evens
@@ -60,6 +66,34 @@ class Domain (object):
     def get_tops(self):
         return self._tops
 
+    def get_bottoms(self):
+        return self._bottoms
+
+    def set_domain(self, other):
+        self._evens = other.get_evens()
+        self._zeros = other.get_zeros()
+        self._odds = other.get_odds()
+        self._tops = other.get_tops()
+        self._bottoms = other.get_bottoms()
+
+    def checkEquals(self, other):
+        print(len(self._evens.difference(other._evens)), len(other._evens.difference(self._evens)))
+        if len(self._evens.difference(other._evens)) > 0 or len(other._evens.difference(self._evens)) > 0:
+            return False
+        print(len(self._odds.difference(other._odds)), len(other._odds.difference(self._odds)))
+        if len(self._odds.difference(other._odds)) > 0 or len(other._odds.difference(self._odds)) > 0:
+            return False
+        print(len(self._zeros.difference(other._zeros)), len(other._zeros.difference(self._zeros)))
+        if len(self._zeros.difference(other._zeros)) > 0 or len(other._zeros.difference(self._zeros)) > 0:
+            return False
+        print(len(other._tops.difference(other._tops)), len(other._tops.difference(self._tops)))
+        if len(self._tops.difference(other._tops)) > 0 or len(other._tops.difference(self._tops)) > 0:
+            return False
+        print(len(self._bottoms.difference(other._bottoms)), len(other._bottoms.difference(self._bottoms)))
+        if len(self._bottoms.difference(other._bottoms)) > 0 or len(other._bottoms.difference(self._bottoms)) > 0:
+            return False
+        return True
+
     def get_type(self, var):
         if var in self._evens:
             return Types.EVEN
@@ -69,18 +103,55 @@ class Domain (object):
             return Types.ZERO
         if var in self._tops:
             return Types.TOP
-        return Types.BOTTOM
+        if var in self._bottoms:
+            return Types.BOTTOM
+        assert False
 
     def join(self, fact):
-        """Joins a given data-flow fact into this one"""
-        self._evens = self._evens.intersection(fact._evens)
-        self._odds = self._odds.intersection(fact._odds)
-        self._zeros = self._zeros.intersection(fact._zeros)
-        self._tops = self._tops.union(fact._top)
-
+        """Joins a given domain fact into this one"""
+        if self.checkEquals(fact):
+            return
+        # join verdicts
+        self._evens = self._evens.union(fact._evens)
+        self._odds = self._odds.union(fact._odds)
+        self._zeros = self._zeros.union(fact._zeros)
+        self._tops = self._tops.union(fact._tops)
+        self._bottoms = self._bottoms.union(fact._bottoms)
+        # merge verdicts
+        tempBottom = self._bottoms
+        for val in tempBottom:
+            self.mark_bottom(val)
+        tempTops = self._tops
+        for val in tempTops:
+            self.mark_top(val)
+        # handle evens
+        tempEvens = self._evens
+        tempEvensFork = self.fork()
+        for val in tempEvens:
+            if val in tempEvensFork.get_odds() or val in tempEvensFork.get_zeros():
+                tempEvensFork.mark_top(val)
+                print(val)
+        self.set_domain(tempEvensFork)
+        # handle odds
+        tempOdds = self._odds
+        tempOddsFork = self.fork()
+        for val in tempOdds:
+            if val in tempOddsFork.get_odds() or val in tempOddsFork.get_zeros():
+                tempOddsFork.mark_top(val)
+                print(val)
+        self.set_domain(tempOddsFork)
+        # handle zeros
+        tempZeros = self._zeros
+        tempZerosFork = self.fork()
+        for val in tempZeros:
+            if val in tempZerosFork.get_odds() or val in tempZerosFork.get_zeros():
+                tempZerosFork.mark_top(val)
+                print(val)
+        self.set_domain(tempZerosFork)
+        
     def fork(self):
-        """Splits the current data-flow fact into two"""
-        return Domain(self._evens, self._odds, self._zeros, self._tops)
+        """Splits the current domain into two"""
+        return Domain(self._evens, self._odds, self._zeros, self._tops, self._bottoms)
 
     def removeEven(self, var):
         if var in self._evens:
@@ -127,6 +198,7 @@ class Domain (object):
         self.removeEven(var)
         self.removeOdd(var)
         self.removeTop(var)
+        self._bottoms.add(var)
 
 
 class CFGAnalysis (ast.AstVisitor):
@@ -151,6 +223,9 @@ class CFGAnalysis (ast.AstVisitor):
 
     def get_tops(self):
         return self._dom.get_tops()
+
+    def get_bottoms(self):
+        return self._dom.get_bottoms()
     
     def get_add(self, lhs, rhs, dom):
         tlhs = lhs
@@ -306,6 +381,33 @@ class CFGAnalysis (ast.AstVisitor):
 
     def visit_Stmt(self, node, *args, **kwargs):
         print("stmt")
+        return kwargs['dom']
+    
+    def visit_IfStmt(self, node, *args, **kwargs):
+        print("ifstmt")
+        dom = kwargs['dom']
+        # self.visit(node.cond)
+        dom_then = dom.fork()
+        dom_then = self.visit(node.then_stmt, dom=dom_then)
+        dom.join(dom_then)
+        print("done then")
+        dom_else = dom.fork()
+        if node.has_else():
+            dom_else = self.visit(node.else_stmt, dom=dom_else)
+            print("done else")
+        dom.join(dom_else)
+        return dom
+
+    def visit_AssertStmt(self, node, *args, **kwargs):
+        print("assert")
+        return kwargs['dom']
+
+    def visit_AssumeStmt(self, node, *args, **kwargs):
+        print("assume")
+        return kwargs['dom']
+
+    def visit_WhileStmt(self, node, *args, **kwargs):
+        print("whilestmt")
         return kwargs['dom']
 
 def main():
