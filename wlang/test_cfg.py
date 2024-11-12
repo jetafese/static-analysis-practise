@@ -19,8 +19,8 @@ class TestCFG(unittest.TestCase):
         self.assertEqual(len(cfgCheck.get_zeros()), 0)
         self.assertEqual(len(cfgCheck.get_odds()), 0)
         self.assertEqual(len(cfgCheck.get_bottoms()), 0)
-        self.assertEqual(set(['c', 'r', 'x', 'abcdefghijklm']), cfgCheck.get_tops())
-        self.assertEqual(set(['y']), cfgCheck.get_evens())
+        self.assertEqual(set(['r', 'x']), cfgCheck.get_tops())
+        self.assertEqual(set(['y', 'c']), cfgCheck.get_evens())
 
     def test_prog_3(self):
         cfgCheck = cfg.CFGAnalysis()

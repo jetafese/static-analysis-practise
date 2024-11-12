@@ -1,4 +1,4 @@
-havoc x, y, abcdefghijklm;
+havoc x, y;
 assume y = 4;
 c := 0;
 r := x;
