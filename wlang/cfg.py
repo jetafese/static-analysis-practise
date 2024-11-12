@@ -236,9 +236,9 @@ class CFGAnalysis (ast.AstVisitor):
         tlhs = lhs
         trhs = rhs
         if not isinstance(lhs, Types):
-            tlhs = dom.get_type(lhs)
+            tlhs = dom.get_type(lhs.name)
         if not isinstance(rhs, Types):
-            trhs = dom.get_type(rhs)
+            trhs = dom.get_type(rhs.name)
         if tlhs == Types.BOTTOM or trhs == Types.BOTTOM:
             return Types.BOTTOM
         if tlhs == Types.TOP or trhs == Types.TOP:
@@ -262,9 +262,9 @@ class CFGAnalysis (ast.AstVisitor):
         tlhs = lhs
         trhs = rhs
         if not isinstance(lhs, Types):
-            tlhs = dom.get_type(lhs)
+            tlhs = dom.get_type(lhs.name)
         if not isinstance(rhs, Types):
-            trhs = dom.get_type(rhs)
+            trhs = dom.get_type(rhs.name)
         if tlhs == Types.BOTTOM or trhs == Types.BOTTOM:
             return Types.BOTTOM
         if tlhs == Types.ZERO or trhs == Types.ZERO:
@@ -280,9 +280,9 @@ class CFGAnalysis (ast.AstVisitor):
         tlhs = lhs
         trhs = rhs
         if not isinstance(lhs, Types):
-            tlhs = dom.get_type(lhs)
+            tlhs = dom.get_type(lhs.name)
         if not isinstance(rhs, Types):
-            trhs = dom.get_type(rhs)
+            trhs = dom.get_type(rhs.name)
         if tlhs == Types.BOTTOM or trhs == Types.BOTTOM:
             return Types.BOTTOM
         if tlhs == Types.TOP or trhs == Types.TOP:
@@ -302,9 +302,9 @@ class CFGAnalysis (ast.AstVisitor):
         tlhs = lhs
         trhs = rhs
         if not isinstance(lhs, Types):
-            tlhs = dom.get_type(lhs)
+            tlhs = dom.get_type(lhs.name)
         if not isinstance(rhs, Types):
-            trhs = dom.get_type(rhs)
+            trhs = dom.get_type(rhs.name)
         if tlhs == Types.BOTTOM or trhs == Types.BOTTOM:
             return Types.BOTTOM
         if trhs == Types.ZERO:
@@ -335,15 +335,15 @@ class CFGAnalysis (ast.AstVisitor):
         res = self.visit(node.rhs, dom=dom)
         # print(res)
         if res == Types.EVEN:
-            dom.mark_even(node.lhs)
+            dom.mark_even(node.lhs.name)
         elif res == Types.ODD:
-            dom.mark_odd(node.lhs)
+            dom.mark_odd(node.lhs.name)
         elif res == Types.ZERO:
-            dom.mark_zero(node.lhs)
+            dom.mark_zero(node.lhs.name)
         elif res == Types.TOP:
-            dom.mark_top(node.lhs)
+            dom.mark_top(node.lhs.name)
         else:
-            dom.mark_bottom(node.lhs)
+            dom.mark_bottom(node.lhs.name)
         # print(dom.get_type(node.lhs))
         return dom
 
@@ -368,7 +368,7 @@ class CFGAnalysis (ast.AstVisitor):
     def visit_IntVar(self, node, *args, **kwargs):
         # print("int var: ", node.name)
         dom = kwargs['dom']
-        return dom.get_type(node)
+        return dom.get_type(node.name)
 
     def visit_Const(self, node, *args, **kwargs):
         # print("const: ", node.val)
@@ -381,7 +381,7 @@ class CFGAnalysis (ast.AstVisitor):
     def visit_HavocStmt(self, node, *args, **kwargs):
         dom = kwargs['dom']
         for v in node.vars:
-            dom.mark_top(v)
+            dom.mark_top(v.name)
         return dom
 
     def visit_Stmt(self, node, *args, **kwargs):
@@ -426,18 +426,18 @@ class CFGAnalysis (ast.AstVisitor):
         trhs = rhs
         if isinstance(lhs, ast.IntVar):
             if not isinstance(rhs, Types):
-                trhs = dom.get_type(rhs)
+                trhs = dom.get_type(rhs.name)
             if node.op == "=":
                 if trhs == Types.EVEN:
-                    dom.mark_even(lhs)
+                    dom.mark_even(lhs.name)
                 elif trhs == Types.ODD:
-                    dom.mark_odd(lhs)
+                    dom.mark_odd(lhs.name)
                 elif trhs == Types.ZERO:
-                    dom.mark_zero(lhs)
+                    dom.mark_zero(lhs.name)
                 elif trhs == Types.TOP:
-                    dom.mark_top(lhs)
+                    dom.mark_top(lhs.name)
                 else:
-                    dom.mark_bottom(lhs)
+                    dom.mark_bottom(lhs.name)
         return dom
 
 def main():
