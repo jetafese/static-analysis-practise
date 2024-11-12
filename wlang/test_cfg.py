@@ -53,9 +53,9 @@ class TestCFG(unittest.TestCase):
         cfgCheck = cfg.CFGAnalysis()
         cfgCheck.analyze('wlang/prog6.prg')
         self.assertEqual(len(cfgCheck.get_zeros()), 0)
-        self.assertEqual(len(cfgCheck.get_odds()), 0)
+        self.assertEqual(len(cfgCheck.get_tops()), 0)
         self.assertEqual(set(['a', 'b']), cfgCheck.get_evens())
-        self.assertEqual(set(['c', 'd']), cfgCheck.get_tops())
+        self.assertEqual(set(['c', 'd']), cfgCheck.get_odds())
 
     def test_prog_7(self):
         cfgCheck = cfg.CFGAnalysis()
