@@ -10,7 +10,7 @@ class TestId(unittest.TestCase):
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertFalse(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 0)
+        self.assertEqual(depthcheck.get_depth(), 0)
 
     def test_safe_1_1(self):
         prg1 = "havoc y; x := 1; if y > 10 then { x := x + 1 }"
@@ -18,7 +18,7 @@ class TestId(unittest.TestCase):
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertFalse(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 1)
+        self.assertEqual(depthcheck.get_depth(), 1)
 
     def test_safe_1_2(self):
         prg1 = "havoc y; x := 1; if y > 10 then x := x + 1 else x := x - 1"
@@ -26,7 +26,7 @@ class TestId(unittest.TestCase):
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertFalse(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 1)
+        self.assertEqual(depthcheck.get_depth(), 1)
 
     def test_unsafe_havoc(self):
         ast1 = ast.parse_file('wlang/prog1.prg')
@@ -39,14 +39,14 @@ class TestId(unittest.TestCase):
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertFalse(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 4)
+        self.assertEqual(depthcheck.get_depth(), 4)
 
     def test_safe_cascade(self):
         ast1 = ast.parse_file('wlang/prog3.prg')
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertFalse(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 4)
+        self.assertEqual(depthcheck.get_depth(), 4)
 
 
     def test_unsafe_cascade(self):
@@ -54,11 +54,11 @@ class TestId(unittest.TestCase):
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertTrue(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 5)
+        self.assertEqual(depthcheck.get_depth(), 5)
 
     def test_safe_cascade_2(self):
         ast1 = ast.parse_file('wlang/prog5.prg')
         depthcheck = depth.DepthChecker()
         depthcheck.visit(ast1)
         self.assertFalse(depthcheck.get_isViolator())
-        self.assertEquals(depthcheck.get_depth(), 1)
+        self.assertEqual(depthcheck.get_depth(), 1)
